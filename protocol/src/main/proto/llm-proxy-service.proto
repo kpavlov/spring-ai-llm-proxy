@@ -1,0 +1,108 @@
+syntax = "proto3";
+package me.kpavlov.llm.proxy.grpc.v1;
+
+option java_multiple_files = true;
+
+service LlmService {
+  rpc ChatCompletion(stream ChatCompletionRequest) returns (stream ChatCompletionResponse) {}
+}
+
+// ChatCompletionRequest represents input for chat completion
+message ChatCompletionRequest {
+  // ID of the request
+  string request_id = 1;
+  // ID of the session
+  string session_id = 2;
+  // Prompt information
+  Prompt prompt = 3;
+
+  // Additional parameters for controlling the completion
+  map<string, string> parameters = 4;
+}
+
+// Prompt contains the input context for generation
+message Prompt {
+  // Unique identifier for the prompt
+  string id = 1;
+
+  // Name/title of the prompt
+  string name = 2;
+
+  // List of categorical tags
+  map<string, string> tags = 3;
+
+  // Key-value pairs for additional metadata
+  map<string, string> labels = 4;
+
+  // The actual prompt content
+  string content = 5;
+}
+
+// ChatCompletionResponse represents a chunk of the streaming response
+message ChatCompletionResponse {
+  // Unique identifier for this chunk
+  string chunk_id = 1;
+
+  // ID of the request this chunk belongs to
+  string request_id = 2;
+
+  // ID of the session this chunk belongs to
+  string session_id = 3;
+
+  // Timestamp of when this chunk was generated
+  int64 timestamp = 4;
+
+  // The type of chunk being returned
+  ChunkType chunk_type = 5;
+
+  oneof data {
+    // Content chunk when successful
+    ContentChunk content = 6;
+
+    // Error details when something goes wrong
+    ErrorChunk error = 7;
+  }
+}
+
+// ContentChunk represents a successful response chunk
+message ContentChunk {
+  // The generated text content
+  string text = 1;
+
+  // Whether this is the final chunk
+  bool is_final = 2;
+
+  // Optional metadata about the generation
+  map<string, string> metadata = 3;
+}
+
+// ErrorChunk provides details about an error
+message ErrorChunk {
+  // Error code
+  ErrorCode code = 1;
+
+  // Human-readable error message
+  string message = 2;
+
+  // Additional error details
+  map<string, string> details = 3;
+}
+
+// ChunkType indicates what kind of chunk is being returned
+enum ChunkType {
+  CHUNK_TYPE_UNSPECIFIED = 0;
+  CHUNK_TYPE_CONTENT = 1;
+  CHUNK_TYPE_ERROR = 2;
+  CHUNK_TYPE_DONE = 3;
+}
+
+// ErrorCode enumerates possible error conditions
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  ERROR_CODE_INVALID_REQUEST = 1;
+  ERROR_CODE_MODEL_ERROR = 2;
+  ERROR_CODE_RATE_LIMITED = 3;
+  ERROR_CODE_CONTEXT_LENGTH_EXCEEDED = 4;
+  ERROR_CODE_CONTENT_FILTERED = 5;
+  ERROR_CODE_INTERNAL = 6;
+}

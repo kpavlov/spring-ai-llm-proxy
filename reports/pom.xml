@@ -19,8 +19,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>me.kpavlov.project</groupId>
-            <artifactId>core</artifactId>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>server</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>

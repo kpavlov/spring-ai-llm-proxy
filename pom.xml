@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>me.kpavlov.project</groupId>
     <artifactId>root</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Project :: Root</name>
+    <name>Spring-AI LLM Proxy</name>
     <description>Kotlin Project Template</description>
     <url>https://github.com/kpavlov/awesome-kotlin-maven-template</url>
 
@@ -30,7 +31,9 @@
 
     <modules>
         <module>bom</module>
-        <module>core</module>
+        <module>protocol</module>
+        <module>client</module>
+        <module>server</module>
         <module>reports</module>
     </modules>
 
@@ -47,16 +50,20 @@
         <java.version>17</java.version>
         <kotlin.version>2.1.0</kotlin.version>
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
-        <java.compiler.release>${java.version}</java.compiler.release>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
         <!-- Dependencies -->
         <assertk.version>0.28.1</assertk.version>
         <awaitility.version>4.2.2</awaitility.version>
+        <grpc-kotlin.version>1.4.1</grpc-kotlin.version>
+        <grpc.version>1.69.0</grpc.version>
         <junit.version>5.11.4</junit.version>
         <kotlinx.version>1.10.1</kotlinx.version>
+        <mockito-kotlin.version>5.4.0</mockito-kotlin.version>
         <mockito.version>5.14.2</mockito.version>
+        <protobuf.version>4.27.1</protobuf.version>
         <slf4j.version>2.0.16</slf4j.version>
         <wiremock.version>3.9.2</wiremock.version>
-        <mockito-kotlin.version>5.4.0</mockito-kotlin.version>
     </properties>
 
     <dependencyManagement>
@@ -65,6 +72,13 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-bom</artifactId>
                 <version>${kotlin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-bom</artifactId>
+                <version>${grpc.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
