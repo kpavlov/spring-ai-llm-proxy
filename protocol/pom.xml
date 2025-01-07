@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>me.kpavlov.project</groupId>
+        <groupId>me.kpavlov.spring-ai.llm-proxy</groupId>
         <artifactId>root</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -11,9 +10,6 @@
 
     <artifactId>protocol</artifactId>
     <name>Spring-AI LLM Proxy :: Protocol</name>
-    <properties>
-        <grpc-kotlin.version>1.4.1</grpc-kotlin.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -28,7 +24,6 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
-            <version>${grpc.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -44,22 +39,15 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
-            <version>${grpc.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <version>${grpc.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-kotlin-stub</artifactId>
             <version>${grpc-kotlin.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-kotlin</artifactId>
-            <version>${protobuf.version}</version>
         </dependency>
         <!-- Test Dependencies -->
         <dependency>
@@ -69,31 +57,22 @@
         </dependency>
     </dependencies>
     <build>
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>1.7.1</version>
-            </extension>
-        </extensions>
         <plugins>
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
+                <configuration>
+                    <attachProtoSources>true</attachProtoSources>
+                    <indentSize>4</indentSize>
+                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+                </configuration>
                 <executions>
-                    <!-- Regular protobuf compilation -->
-                    <execution>
-                        <id>compile</id>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-
                     <!-- gRPC stub generation -->
                     <execution>
-                        <id>grpc-java</id>
+                        <id>java</id>
                         <goals>
+                            <goal>compile</goal>
                             <goal>compile-custom</goal>
                         </goals>
                         <configuration>
@@ -114,14 +93,14 @@
                         </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <attachProtoSources>true</attachProtoSources>
-                    <indentSize>4</indentSize>
-                    <protocArtifact>
-                        com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}
-                    </protocArtifact>
-                </configuration>
             </plugin>
         </plugins>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.1</version>
+            </extension>
+        </extensions>
     </build>
 </project>

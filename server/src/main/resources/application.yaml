@@ -1,8 +1,7 @@
-debug: true
-
 spring:
   grpc:
     server:
-      port: 5001
+      port: 50051
   main:
     web-application-type: none
+    register-shutdown-hook: true

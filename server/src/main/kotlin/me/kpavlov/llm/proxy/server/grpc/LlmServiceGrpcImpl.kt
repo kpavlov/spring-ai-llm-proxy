@@ -15,21 +15,28 @@ import me.kpavlov.llm.proxy.grpc.v1.ErrorCode
 import me.kpavlov.llm.proxy.grpc.v1.LlmServiceGrpc
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
-class LlmServiceImpl(
+class LlmServiceGrpcImpl(
     private val llmService: LlmService,
 ) : LlmServiceGrpc.LlmServiceImplBase() {
-    private val logger = LoggerFactory.getLogger(LlmServiceImpl::class.java)
+    private val logger = LoggerFactory.getLogger(LlmServiceGrpcImpl::class.java)
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     override fun chatCompletion(
         responseObserver: StreamObserver<ChatCompletionResponse>,
     ): StreamObserver<ChatCompletionRequest> =
+
         object : StreamObserver<ChatCompletionRequest> {
+            @Suppress("TooGenericExceptionCaught")
             override fun onNext(request: ChatCompletionRequest) {
                 scope.launch {
                     try {
+                        logger.debug(
+                            "Request received: requestId={} sessionId={}",
+                            request.requestId,
+                            request.sessionId,
+                        )
                         processChatRequest(request, responseObserver)
                     } catch (e: Exception) {
                         handleError(e, responseObserver)
@@ -38,12 +45,14 @@ class LlmServiceImpl(
             }
 
             override fun onError(error: Throwable) {
-                logger.error("Error in chat completion stream", error)
+                logger.warn("Stream error", error)
                 handleError(error, responseObserver)
             }
 
+            @Suppress("TooGenericExceptionCaught")
             override fun onCompleted() {
                 try {
+                    logger.debug("Completing stream")
                     responseObserver.onCompleted()
                 } catch (e: Exception) {
                     logger.error("Error completing response stream", e)
@@ -51,6 +60,7 @@ class LlmServiceImpl(
             }
         }
 
+    @Suppress("TooGenericExceptionCaught")
     private suspend fun processChatRequest(
         request: ChatCompletionRequest,
         responseObserver: StreamObserver<ChatCompletionResponse>,
@@ -64,6 +74,7 @@ class LlmServiceImpl(
                 when (result) {
                     is LlmResult.Content -> sendContent(result.content, request, responseObserver)
                     is LlmResult.Error -> sendError(result.error, request, responseObserver)
+                    is LlmResult.Completed -> sendCompletion(request, responseObserver)
                 }
             }
         } catch (e: Exception) {
@@ -125,11 +136,29 @@ class LlmServiceImpl(
         responseObserver.onNext(response)
     }
 
+    private fun sendCompletion(
+        request: ChatCompletionRequest,
+        responseObserver: StreamObserver<ChatCompletionResponse>,
+    ) {
+        val response =
+            ChatCompletionResponse
+                .newBuilder()
+                .setChunkId(generateChunkId())
+                .setRequestId(request.requestId)
+                .setSessionId(request.sessionId)
+                .setTimestamp(Instant.now().toEpochMilli())
+                .setChunkType(ChunkType.CHUNK_TYPE_DONE)
+                .build()
+
+        responseObserver.onNext(response)
+        responseObserver.onCompleted()
+    }
+
     private fun handleError(
         error: Throwable,
         responseObserver: StreamObserver<ChatCompletionResponse>,
     ) {
-        logger.error("Error processing request", error)
+        logger.error("Error processing request:", error)
 
         val status =
             when (error) {
@@ -166,6 +195,10 @@ class LlmServiceImpl(
 sealed class LlmResult {
     data class Content(
         val content: String,
+    ) : LlmResult()
+
+    data class Completed(
+        val info: Any? = null,
     ) : LlmResult()
 
     data class Error(

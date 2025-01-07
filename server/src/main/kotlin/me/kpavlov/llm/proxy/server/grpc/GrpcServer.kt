@@ -24,7 +24,7 @@ class GrpcServer(
     private val server: Server =
         ServerBuilder
             .forPort(port)
-            .addService(LlmServiceImpl(llmService))
+            .addService(LlmServiceGrpcImpl(llmService))
             .build()
 
     private val logger = LoggerFactory.getLogger(GrpcServer::class.java)

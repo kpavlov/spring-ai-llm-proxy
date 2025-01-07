@@ -1,0 +1,6 @@
+debug: true
+
+logging:
+  level:
+    "me.kpavlov.llm.proxy": debug
+    root: debug

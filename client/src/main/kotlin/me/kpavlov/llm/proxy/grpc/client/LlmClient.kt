@@ -4,7 +4,11 @@ import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import me.kpavlov.llm.proxy.grpc.v1.*
+import me.kpavlov.llm.proxy.grpc.v1.ChatCompletionRequest
+import me.kpavlov.llm.proxy.grpc.v1.ChatCompletionResponse
+import me.kpavlov.llm.proxy.grpc.v1.LlmServiceGrpc
+import me.kpavlov.llm.proxy.grpc.v1.Prompt
+import org.slf4j.LoggerFactory
 import java.io.Closeable
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -13,6 +17,7 @@ open class LlmClient(
     private val channel: ManagedChannel,
 ) : Closeable {
     private val stub: LlmServiceGrpc.LlmServiceStub = LlmServiceGrpc.newStub(channel)
+    private val logger = LoggerFactory.getLogger(LlmClient::class.java)
 
     companion object {
         fun create(
@@ -38,15 +43,18 @@ open class LlmClient(
                 stub.chatCompletion(
                     object : StreamObserver<ChatCompletionResponse> {
                         override fun onNext(response: ChatCompletionResponse) {
-                            trySend(response).isSuccess
+                            val result = trySend(response).isSuccess
+                            logger.info("Sent chat completion request: $result")
                         }
 
                         override fun onError(t: Throwable) {
+                            logger.error("Channel error", t)
                             close(t)
                         }
 
                         override fun onCompleted() {
                             close()
+                            logger.info("Stream completed")
                         }
                     },
                 )
@@ -57,7 +65,6 @@ open class LlmClient(
             // Send the request
             try {
                 requestObserver.onNext(request)
-                requestObserver.onCompleted()
             } catch (e: Exception) {
                 requestObserver.onError(e)
                 close(e)

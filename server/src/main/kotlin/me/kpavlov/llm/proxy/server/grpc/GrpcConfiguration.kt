@@ -1,5 +1,6 @@
 package me.kpavlov.llm.proxy.server.grpc
 
+import jakarta.annotation.PreDestroy
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.context.event.ApplicationStartedEvent
@@ -26,8 +27,16 @@ open class GrpcConfiguration {
     }
 
     @EventListener
+    @Suppress("UnusedParameter")
     fun onApplicationStarted(readyEvent: ApplicationStartedEvent) {
-        server.start()
-        server.blockUntilShutdown()
+        Thread.startVirtualThread {
+            server.start()
+            server.blockUntilShutdown()
+        }
+    }
+
+    @PreDestroy
+    fun preDestroy() {
+        server.stop()
     }
 }
