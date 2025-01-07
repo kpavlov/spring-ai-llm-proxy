@@ -1,0 +1,8 @@
+debug: true
+
+spring:
+  grpc:
+    server:
+      port: 5001
+  main:
+    web-application-type: none
