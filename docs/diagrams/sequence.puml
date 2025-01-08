@@ -1,0 +1,48 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+
+actor Client as "gRPC Client"
+participant Server as "gRPC Server" #APPLICATION
+participant Router #APPLICATION
+participant Connector as "LLM Connector" #APPLICATION
+participant PS as "Prompt Source" #APPLICATION
+participant PP as "External\nPrompt Provider"
+participant LLM as "External\nLLM"
+
+Client-> Server: "Open bidirectional stream"
+
+activate Client
+Client->>Server: Send prompt name & data
+activate Server
+
+Server-> Router: Route request
+Router-> Connector: Forward to appropriate connector
+
+Connector-> PS: Get prompt templates
+PS-> PP: Retrieve templates
+PP--> PS: Return templates
+PS--> Connector: Return user & system templates
+
+Connector->>Connector: Interpolate data with templates
+
+Connector-> LLM: Send processed request
+
+loop Response streaming
+    LLM-->>Connector: Stream response chunks
+    Connector-->>Router: Forward chunks
+    Router-->>Server: Forward chunks
+    Server-->>Client: Stream response chunks
+end
+
+LLM-->>Connector: Complete response
+Connector-->>Router: Signal completion
+Router-->>Server: Signal completion
+Server-->> Client: Close stream
+deactivate Client
+
+@enduml
+
+

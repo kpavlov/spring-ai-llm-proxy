@@ -1,0 +1,55 @@
+@startuml
+'!define C4Context
+'!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+'!define C4Container
+'!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+'!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include DEVICONS/angular.puml
+!include DEVICONS/java.puml
+!include FONTAWESOME/users.puml
+
+'skinparam linetype ortho
+
+title LLM Proxy System Architecture
+
+' External systems
+System_Ext(client, "gRPC Client", "Makes bidirectional streaming requests with prompt name and data")
+System_Ext(llm1, "LLM Service 1", "External Language Model (e.g., OpenAI)")
+System_Ext(llm2, "LLM Service 2", "External Language Model (e.g., Anthropic)")
+System_Ext(promptProvider, "External Prompt Provider", "External system storing prompt templates")
+
+' Core components
+System_Boundary(proxy, "LLM Proxy") {
+    Container(grpcServer, "gRPC Server", "gRPC", "Handles bidirectional streaming communication")
+    Container(router, "Router", ,"Routes requests to appropriate LLM connector")
+    Container(promptSource, "Prompt Source", , "Manages and retrieves prompt templates")
+
+    Container_Boundary(connectors, "LLM Connectors") {
+        Container(connector1, "LLM Connector 1", , "Handles specific LLM integration")
+        Container(connector2, "LLM Connector 2", , "Handles specific LLM integration")
+    }
+}
+
+' Relationships
+Rel(client, grpcServer, "Sends prompt name & data", "gRPC bidirectional stream")
+Rel(grpcServer, router, "Routes request", "sync")
+Rel(router, connector1, "Routes to", "sync")
+Rel(router, connector2, "Routes to", "sync")
+Rel(connector1, promptSource, "Gets templates", "sync")
+Rel(connector2, promptSource, "Gets templates", "sync")
+Rel(promptSource, promptProvider, "Retrieves templates", "async")
+Rel(connector1, llm1, "Sends processed request")
+Rel(connector2, llm2, "Sends processed request")
+
+' Return flow
+Rel_Back(connector1, llm1, "Returns response", "async")
+Rel_Back(connector2, llm2, "Returns response", "async")
+Rel_Back(connector1, grpcServer, "Streams response", "async")
+Rel_Back(connector2, grpcServer, "Streams response", "async")
+Rel_Back(grpcServer, client, "Streams response chunks", "gRPC stream")
+@enduml
