@@ -7,7 +7,8 @@ import kotlinx.coroutines.flow.callbackFlow
 import me.kpavlov.llm.proxy.grpc.v1.ChatCompletionRequest
 import me.kpavlov.llm.proxy.grpc.v1.ChatCompletionResponse
 import me.kpavlov.llm.proxy.grpc.v1.LlmServiceGrpc
-import me.kpavlov.llm.proxy.grpc.v1.Prompt
+import me.kpavlov.llm.proxy.grpc.v1.chatCompletionRequest
+import me.kpavlov.llm.proxy.grpc.v1.prompt
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -181,18 +182,16 @@ class LlmClient private constructor(
         sessionId: String,
         parameters: Map<String, String>,
     ): ChatCompletionRequest =
-        ChatCompletionRequest
-            .newBuilder()
-            .setRequestId(UUID.randomUUID().toString())
-            .setSessionId(sessionId)
-            .setPrompt(
-                Prompt
-                    .newBuilder()
-                    .setId(UUID.randomUUID().toString())
-                    .setContent(content)
-                    .build(),
-            ).putAllParameters(parameters)
-            .build()
+        chatCompletionRequest {
+            this.requestId = UUID.randomUUID().toString()
+            this.sessionId = sessionId
+            prompt =
+                prompt {
+                    id = UUID.randomUUID().toString()
+                    this.content = content
+                }
+            this.parameters.putAll(parameters)
+        }
 
     override fun close() {
         channel.shutdown().awaitTermination(config.terminationTimeoutSeconds, TimeUnit.SECONDS)
