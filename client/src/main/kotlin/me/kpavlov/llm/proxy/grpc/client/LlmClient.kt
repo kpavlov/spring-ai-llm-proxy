@@ -9,115 +9,45 @@ import me.kpavlov.llm.proxy.grpc.v1.ChatCompletionResponse
 import me.kpavlov.llm.proxy.grpc.v1.LlmServiceGrpc
 import me.kpavlov.llm.proxy.grpc.v1.Prompt
 import org.slf4j.LoggerFactory
-import java.io.Closeable
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
-open class LlmClient(
-    private val channel: ManagedChannel,
-) : Closeable {
-    private val stub: LlmServiceGrpc.LlmServiceStub = LlmServiceGrpc.newStub(channel)
-    private val logger = LoggerFactory.getLogger(LlmClient::class.java)
+private val logger = LoggerFactory.getLogger(LlmClient::class.java)
 
-    companion object {
-        fun create(
-            host: String,
-            port: Int,
-        ): LlmClient {
-            val channel =
-                ManagedChannelBuilder
-                    .forAddress(host, port)
-                    .usePlaintext() // Remove in production
-                    .build()
-            return LlmClient(channel)
-        }
-    }
-
-    fun chat(
-        content: String,
-        sessionId: String = UUID.randomUUID().toString(),
-        parameters: Map<String, String> = emptyMap(),
-    ): Flow<ChatCompletionResponse> =
-        callbackFlow {
-            val requestObserver =
-                stub.chatCompletion(
-                    object : StreamObserver<ChatCompletionResponse> {
-                        override fun onNext(response: ChatCompletionResponse) {
-                            val result = trySend(response).isSuccess
-                            logger.info("Sent chat completion request: $result")
-                        }
-
-                        override fun onError(t: Throwable) {
-                            logger.error("Channel error", t)
-                            close(t)
-                        }
-
-                        override fun onCompleted() {
-                            close()
-                            logger.info("Stream completed")
-                        }
-                    },
-                )
-
-            // Create the request
-            val request = createChatRequest(content, sessionId, parameters)
-
-            // Send the request
-            try {
-                requestObserver.onNext(request)
-            } catch (e: Exception) {
-                requestObserver.onError(e)
-                close(e)
-            }
-
-            awaitClose {
-                requestObserver.onCompleted()
-            }
-        }
-
-    private fun createChatRequest(
-        content: String,
-        sessionId: String,
-        parameters: Map<String, String>,
-    ): ChatCompletionRequest {
-        val prompt =
-            Prompt
-                .newBuilder()
-                .setId(UUID.randomUUID().toString())
-                .setContent(content)
-                .build()
-
-        return ChatCompletionRequest
-            .newBuilder()
-            .setRequestId(UUID.randomUUID().toString())
-            .setSessionId(sessionId)
-            .setPrompt(prompt)
-            .putAllParameters(parameters)
-            .build()
-    }
-
-    override fun close() {
-        channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
-    }
-}
-
-// Extended version with error handling and configuration
-class ConfigurableLlmClient private constructor(
+class LlmClient private constructor(
     private val channel: ManagedChannel,
     private val config: Config,
-) : Closeable {
+) : AutoCloseable {
     private val stub: LlmServiceGrpc.LlmServiceStub = LlmServiceGrpc.newStub(channel)
 
     data class Config(
         val host: String,
         val port: Int,
         val timeoutSeconds: Long = 30,
+        val terminationTimeoutSeconds: Long = 5,
         val maxRetries: Int = 3,
         val useTls: Boolean = false,
     )
 
     companion object {
-        fun create(config: Config): ConfigurableLlmClient {
+        @JvmStatic
+        val DEFAULT_CONFIG: Config =
+            Config(
+                host = "localhost",
+                port = 50051,
+                timeoutSeconds = 30,
+                maxRetries = 3,
+                useTls = false,
+            )
+
+        fun create(
+            host: String = "localhost",
+            port: Int = 50051,
+        ) = create(
+            Config(host = host, port = port),
+        )
+
+        fun create(config: Config = DEFAULT_CONFIG): LlmClient {
             val channel =
                 ManagedChannelBuilder
                     .forAddress(config.host, config.port)
@@ -126,7 +56,7 @@ class ConfigurableLlmClient private constructor(
                         enableRetry()
                         maxRetryAttempts(config.maxRetries)
                     }.build()
-            return ConfigurableLlmClient(channel, config)
+            return LlmClient(channel, config)
         }
     }
 
@@ -139,6 +69,7 @@ class ConfigurableLlmClient private constructor(
         callbackFlow {
             var requestObserver: StreamObserver<ChatCompletionRequest>? = null
 
+            @Suppress("TooGenericExceptionCaught")
             try {
                 requestObserver =
                     stub
@@ -146,23 +77,25 @@ class ConfigurableLlmClient private constructor(
                         .chatCompletion(
                             object : StreamObserver<ChatCompletionResponse> {
                                 override fun onNext(response: ChatCompletionResponse) {
-                                    trySend(response).isSuccess
+                                    val result = trySend(response).isSuccess
+                                    logger.info("Sent chat completion request: $result")
                                 }
 
                                 override fun onError(t: Throwable) {
+                                    logger.error("Channel error", t)
                                     onError(t)
                                     close(t)
                                 }
 
                                 override fun onCompleted() {
                                     close()
+                                    logger.info("Stream completed")
                                 }
                             },
                         )
 
                 val request = createChatRequest(content, sessionId, parameters)
                 requestObserver.onNext(request)
-                requestObserver.onCompleted()
             } catch (e: Exception) {
                 requestObserver?.onError(e)
                 onError(e)
@@ -193,10 +126,11 @@ class ConfigurableLlmClient private constructor(
             .build()
 
     override fun close() {
-        channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
+        channel.shutdown().awaitTermination(config.terminationTimeoutSeconds, TimeUnit.SECONDS)
     }
 }
 
+/*
 // Example usage:
 suspend fun main() {
     // Simple usage
@@ -242,3 +176,4 @@ suspend fun main() {
             }
     }
 }
+*/
