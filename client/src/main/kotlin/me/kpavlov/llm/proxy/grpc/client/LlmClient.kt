@@ -14,12 +14,61 @@ import java.util.concurrent.TimeUnit
 
 private val logger = LoggerFactory.getLogger(LlmClient::class.java)
 
+/**
+ * A client for interacting with a Language Learning Model (LLM) server through gRPC.
+ *
+ * @constructor This class cannot be directly instantiated. Use the `create` factory methods
+ * to obtain an instance of this client.
+ * @param channel Managed gRPC channel used for communication with the LLM server.
+ * @param config Configuration object specifying connection parameters, timeout settings, and more.
+ *
+ * Example usage:
+ * ```kotlin
+ * val config =
+ *         ConfigurableLlmClient.Config(
+ *             host = "localhost",
+ *             port = 50051,
+ *             timeoutSeconds = 30,
+ *             maxRetries = 3,
+ *         )
+ *
+ *     ConfigurableLlmClient.create(config).use { client ->
+ *         client
+ *             .chat(
+ *                 content = "What is the meaning of life?",
+ *                 parameters = mapOf("temperature" to "0.7"),
+ *                 onError = { println("Error occurred: ${it.message}") },
+ *             ).collect { response ->
+ *                 when {
+ *                     response.hasContent() -> {
+ *                         print(response.content.text)
+ *                         if (response.content.isFinal) println("\nFinal response received")
+ *                     }
+ *                     response.hasError() -> {
+ *                         System.err.println("Error: ${response.error.message}")
+ *                     }
+ *                 }
+ *             }
+ *     }
+ *     ```
+ */
 class LlmClient private constructor(
     private val channel: ManagedChannel,
     private val config: Config,
 ) : AutoCloseable {
     private val stub: LlmServiceGrpc.LlmServiceStub = LlmServiceGrpc.newStub(channel)
 
+    /**
+     * Configuration data class used to define settings for establishing a connection in the LlmClient.
+     *
+     * @property host The hostname or IP address of the server to connect to.
+     * @property port The port number of the server to connect to.
+     * @property timeoutSeconds The timeout duration, in seconds, for inactive operations.
+     * @property terminationTimeoutSeconds The timeout duration, in seconds, for ensuring graceful termination.
+     * @property maxRetries The maximum number of retry attempts for failed requests.
+     * @property useTls Indicates whether a secure TLS connection should be used. Default is `false`
+     * @property closeOnError Determines whether the connection should close on encountering an error. Default is `true`
+     */
     data class Config(
         val host: String,
         val port: Int,
@@ -27,6 +76,7 @@ class LlmClient private constructor(
         val terminationTimeoutSeconds: Long = 5,
         val maxRetries: Int = 3,
         val useTls: Boolean = false,
+        val closeOnError: Boolean = true,
     )
 
     companion object {
@@ -35,11 +85,20 @@ class LlmClient private constructor(
             Config(
                 host = "localhost",
                 port = 50051,
-                timeoutSeconds = 30,
-                maxRetries = 3,
-                useTls = false,
             )
 
+        /**
+         * Creates and returns a new instance of the LlmClient with default configuration
+         * based on the provided host and port.
+         *
+         * This method uses the supplied host and port parameters to construct a `Config` object and
+         * subsequently initializes an instance of `LlmClient` through the primary create function.
+         *
+         * @param host The hostname or IP address of the server to connect to. Defaults to "localhost".
+         * @param port The port number of the server to connect to. Defaults to 50051.
+         * @return A new instance of the LlmClient configured with the specified host and port.
+         * @see DEFAULT_CONFIG
+         */
         fun create(
             host: String = "localhost",
             port: Int = 50051,
@@ -47,6 +106,14 @@ class LlmClient private constructor(
             Config(host = host, port = port),
         )
 
+        /**
+         * Creates and returns a new instance of the LlmClient based on the provided configuration.
+         * Establishes a connection to the specified server using gRPC with options like TLS and retry settings.
+         *
+         * @param config Configuration object containing the server connection details such as host, port,
+         *               TLS usage, and retry settings. Defaults to `DEFAULT_CONFIG` if not provided.
+         * @return A new instance of the LlmClient configured with the specified connection settings.
+         */
         fun create(config: Config = DEFAULT_CONFIG): LlmClient {
             val channel =
                 ManagedChannelBuilder
@@ -84,7 +151,9 @@ class LlmClient private constructor(
                                 override fun onError(t: Throwable) {
                                     logger.error("Channel error", t)
                                     onError(t)
-                                    close(t)
+                                    if (config.closeOnError) {
+                                        close(t)
+                                    }
                                 }
 
                                 override fun onCompleted() {
@@ -129,51 +198,3 @@ class LlmClient private constructor(
         channel.shutdown().awaitTermination(config.terminationTimeoutSeconds, TimeUnit.SECONDS)
     }
 }
-
-/*
-// Example usage:
-suspend fun main() {
-    // Simple usage
-    LlmClient.create("localhost", 50051).use { client ->
-        client.chat("Tell me a joke").collect { response ->
-            when {
-                response.hasContent() -> {
-                    print(response.content.text)
-                    if (response.content.isFinal) println("\nFinal response received")
-                }
-                response.hasError() -> {
-                    System.err.println("Error: ${response.error.message}")
-                }
-            }
-        }
-    }
-
-    // Configurable usage
-    val config =
-        ConfigurableLlmClient.Config(
-            host = "localhost",
-            port = 50051,
-            timeoutSeconds = 30,
-            maxRetries = 3,
-        )
-
-    ConfigurableLlmClient.create(config).use { client ->
-        client
-            .chat(
-                content = "What is the meaning of life?",
-                parameters = mapOf("temperature" to "0.7"),
-                onError = { println("Error occurred: ${it.message}") },
-            ).collect { response ->
-                when {
-                    response.hasContent() -> {
-                        print(response.content.text)
-                        if (response.content.isFinal) println("\nFinal response received")
-                    }
-                    response.hasError() -> {
-                        System.err.println("Error: ${response.error.message}")
-                    }
-                }
-            }
-    }
-}
-*/
