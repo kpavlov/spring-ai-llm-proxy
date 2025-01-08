@@ -1,3 +1,5 @@
+package me.kpavlov.llm.proxy.grpc.client
+
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.grpc.stub.StreamObserver
@@ -55,36 +57,15 @@ private val logger = LoggerFactory.getLogger(LlmClient::class.java)
  */
 class LlmClient private constructor(
     private val channel: ManagedChannel,
-    private val config: Config,
+    private val config: LlmClientConfig,
 ) : AutoCloseable {
     private val stub: LlmServiceGrpc.LlmServiceStub = LlmServiceGrpc.newStub(channel)
 
-    /**
-     * Configuration data class used to define settings for establishing a connection in the LlmClient.
-     *
-     * @property host The hostname or IP address of the server to connect to.
-     * @property port The port number of the server to connect to.
-     * @property timeoutSeconds The timeout duration, in seconds, for inactive operations.
-     * @property terminationTimeoutSeconds The timeout duration, in seconds, for ensuring graceful termination.
-     * @property maxRetries The maximum number of retry attempts for failed requests.
-     * @property useTls Indicates whether a secure TLS connection should be used. Default is `false`
-     * @property closeOnError Determines whether the connection should close on encountering an error. Default is `true`
-     */
-    data class Config(
-        val host: String,
-        val port: Int,
-        val timeoutSeconds: Long = 30,
-        val terminationTimeoutSeconds: Long = 5,
-        val maxRetries: Int = 3,
-        val useTls: Boolean = false,
-        val closeOnError: Boolean = true,
-    )
-
     companion object {
         @JvmStatic
-        val DEFAULT_CONFIG: Config =
-            Config(
-                host = "localhost",
+        val DEFAULT_CONFIG: LlmClientConfig =
+            LlmClientConfig(
+                hostname = "localhost",
                 port = 50051,
             )
 
@@ -104,7 +85,7 @@ class LlmClient private constructor(
             host: String = "localhost",
             port: Int = 50051,
         ) = create(
-            Config(host = host, port = port),
+            LlmClientConfig(hostname = host, port = port),
         )
 
         /**
@@ -115,10 +96,10 @@ class LlmClient private constructor(
          *               TLS usage, and retry settings. Defaults to `DEFAULT_CONFIG` if not provided.
          * @return A new instance of the LlmClient configured with the specified connection settings.
          */
-        fun create(config: Config = DEFAULT_CONFIG): LlmClient {
+        fun create(config: LlmClientConfig = DEFAULT_CONFIG): LlmClient {
             val channel =
                 ManagedChannelBuilder
-                    .forAddress(config.host, config.port)
+                    .forAddress(config.hostname, config.port)
                     .apply {
                         if (!config.useTls) usePlaintext()
                         enableRetry()

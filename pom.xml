@@ -26,8 +26,9 @@
         <module>protocol</module>
         <module>client</module>
         <module>server</module>
-        <module>reports</module>
+        <module>spring-boot-starters/llm-proxy-client-spring-boot-starter</module>
         <module>integration-tests</module>
+        <module>reports</module>
     </modules>
 
     <scm>

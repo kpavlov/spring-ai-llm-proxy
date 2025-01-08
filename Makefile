@@ -1,5 +1,5 @@
 build:
-	  mvn clean verify dokka:dokka site
+	  mvn clean verify dokka:dokka
 
 apidocs:
 	  mvn clean dokka:dokka -pl !reports && \

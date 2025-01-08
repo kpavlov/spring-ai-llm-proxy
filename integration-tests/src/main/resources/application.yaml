@@ -1,0 +1,7 @@
+spring:
+  ai:
+    llm-proxy:
+      client:
+        options:
+          hostname: localhost
+          port: 50051
