@@ -10,13 +10,6 @@
     <description>Kotlin Project Template</description>
     <url>https://github.com/kpavlov/awesome-kotlin-maven-template</url>
 
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/license/mit</url>
-        </license>
-    </licenses>
-
     <developers>
         <developer>
             <name>Konstantin Pavlov</name>
