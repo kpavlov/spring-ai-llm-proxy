@@ -27,6 +27,7 @@
         <module>client</module>
         <module>server</module>
         <module>spring-boot-starters/llm-proxy-client-spring-boot-starter</module>
+        <module>spring-boot-starters/llm-proxy-server-spring-boot-starter</module>
         <module>integration-tests</module>
         <module>reports</module>
     </modules>

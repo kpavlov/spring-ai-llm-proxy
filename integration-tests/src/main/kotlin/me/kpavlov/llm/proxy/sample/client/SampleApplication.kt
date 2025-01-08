@@ -5,5 +5,7 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 
 @SpringBootApplication
-@ImportAutoConfiguration(LlmProxyClientAutoConfiguration::class)
+@ImportAutoConfiguration(
+    LlmProxyClientAutoConfiguration::class,
+)
 open class SampleApplication

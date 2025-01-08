@@ -4,3 +4,7 @@ logging:
   level:
     "me.kpavlov.llm.proxy": debug
     root: debug
+
+spring:
+  main:
+    banner-mode: off
