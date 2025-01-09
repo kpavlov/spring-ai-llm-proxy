@@ -1,0 +1,1 @@
+/* (C) Copyright $YEAR Konstantin Pavlov. Licensed under BSD-3-Clause License. */

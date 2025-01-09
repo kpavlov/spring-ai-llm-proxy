@@ -29,3 +29,7 @@ make build
 
 We welcome contributions! Please see the [Contributing Guidelines](CONTRIBUTING.md) for details.
 
+## License
+
+Licensed under [BSD-3 License](LICENSE.txt)
+

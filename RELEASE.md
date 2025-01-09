@@ -34,7 +34,6 @@
    gpgconf --kill gpg-agent
    gpg -K --keyid-format SHORT
    ```
-
 4. Push
 
    ```shell

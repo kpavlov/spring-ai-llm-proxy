@@ -10,6 +10,13 @@
     <description>Kotlin Project Template</description>
     <url>https://github.com/kpavlov/awesome-kotlin-maven-template</url>
 
+    <licenses>
+        <license>
+            <name>BSD-3-Clause</name>
+            <url>https://opensource.org/license/bsd-3-clause</url>
+        </license>
+    </licenses>
+
     <developers>
         <developer>
             <name>Konstantin Pavlov</name>
@@ -40,6 +47,7 @@
     </scm>
 
     <properties>
+        <project.root.dir>${user.dir}</project.root.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.code.style>official</kotlin.code.style>
         <java.version>21</java.version>
@@ -265,6 +273,9 @@
                         </java>
                         <kotlin>
                             <ktlint/>
+                            <licenseHeader>
+                                <file>${project.root.dir}/license-header.txt</file>
+                            </licenseHeader>
                         </kotlin>
                         <markdown>
                             <includes>

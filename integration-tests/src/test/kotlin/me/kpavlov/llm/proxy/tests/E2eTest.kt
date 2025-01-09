@@ -1,3 +1,4 @@
+// (C) Copyright 2025 Konstantin Pavlov. Licensed under BSD-3-Clause License.
 package me.kpavlov.llm.proxy.tests
 
 import kotlinx.coroutines.test.runTest
