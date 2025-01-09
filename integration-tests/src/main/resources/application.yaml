@@ -1,7 +1,13 @@
+
+
 spring:
   ai:
     llm-proxy:
       client:
         options:
           hostname: localhost
-          port: 50051
+          port: ${server.grpc.port}
+
+server:
+  grpc:
+    port: 50051

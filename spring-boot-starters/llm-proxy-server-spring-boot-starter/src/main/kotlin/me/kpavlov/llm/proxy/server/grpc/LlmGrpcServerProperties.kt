@@ -3,7 +3,19 @@ package me.kpavlov.llm.proxy.server.grpc
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "spring.ai.llm-proxy.server.grpc")
+/**
+ * Configuration properties for the gRPC server in the application.
+ *
+ * These properties control the behavior of the gRPC server, such as whether it is enabled and
+ * the address to which the server binds.
+ *
+ * @property enabled Indicates whether the gRPC server is enabled. Defaults to `true`.
+ * @property address Specifies the address that the gRPC server binds to. Defaults to `localhost`.
+ * @property port gRPC server port. Defaults to `50051`.
+ */
+@ConfigurationProperties(prefix = "server.grpc")
 data class LlmGrpcServerProperties(
     val enabled: Boolean = true,
+    val address: String = "localhost",
+    val port: Int = 50051,
 )

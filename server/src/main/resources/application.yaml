@@ -1,7 +1,7 @@
-spring:
+server:
   grpc:
-    server:
-      port: 50051
+    port: 50051
+spring:
   main:
     web-application-type: none
     register-shutdown-hook: true

@@ -1,6 +1,7 @@
 // (C) Copyright 2025 Konstantin Pavlov. Licensed under BSD-3-Clause License.
-package me.kpavlov.llm.proxy.server.grpc
+package me.kpavlov.spring.server.grpc
 
+import io.grpc.BindableService
 import io.grpc.Server
 import io.grpc.ServerBuilder
 import org.slf4j.LoggerFactory
@@ -20,12 +21,12 @@ import org.slf4j.LoggerFactory
  */
 class GrpcServer(
     private val port: Int,
-    llmService: LlmService,
+    bindableService: BindableService,
 ) {
     private val server: Server =
         ServerBuilder
             .forPort(port)
-            .addService(LlmServiceGrpcImpl(llmService))
+            .addService(bindableService)
             .build()
 
     private val logger = LoggerFactory.getLogger(GrpcServer::class.java)

@@ -19,7 +19,6 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>${protobuf.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
@@ -29,12 +28,10 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java-util</artifactId>
-            <version>${protobuf.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-kotlin</artifactId>
-            <version>${protobuf.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
@@ -47,7 +44,6 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-kotlin-stub</artifactId>
-            <version>${grpc-kotlin.version}</version>
         </dependency>
         <!-- Test Dependencies -->
         <dependency>

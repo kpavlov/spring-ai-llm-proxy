@@ -2,14 +2,13 @@
 package me.kpavlov.llm.proxy.tests
 
 import kotlinx.coroutines.test.runTest
-import me.kpavlov.llm.proxy.Application
 import me.kpavlov.llm.proxy.grpc.client.LlmClient
 import me.kpavlov.llm.proxy.sample.client.SampleApplication
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest(classes = [Application::class, SampleApplication::class])
+@SpringBootTest(classes = [SampleApplication::class])
 class E2eTest {
     @Autowired
     lateinit var client: LlmClient

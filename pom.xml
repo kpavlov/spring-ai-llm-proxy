@@ -13,7 +13,7 @@
     <licenses>
         <license>
             <name>BSD-3-Clause</name>
-            <url>https://opensource.org/license/bsd-3-clause</url>
+            <url>https://opensource.org/licenses/BSD-3-Clause</url>
         </license>
     </licenses>
 
@@ -64,7 +64,7 @@
         <kotlinx.version>1.10.1</kotlinx.version>
         <mockito-kotlin.version>5.4.0</mockito-kotlin.version>
         <mockito.version>5.15.2</mockito.version>
-        <protobuf.version>4.29.3</protobuf.version>
+        <protobuf.version>4.29.2</protobuf.version>
         <spring-ai.version>1.0.0-M5</spring-ai.version>
         <spring-boot.version>3.4.1</spring-boot.version>
         <slf4j.version>2.0.16</slf4j.version>
@@ -93,6 +93,11 @@
                 <version>${kotlinx.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-kotlin-stub</artifactId>
+                <version>${grpc-kotlin.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-bom</artifactId>
                 <version>${slf4j.version}</version>
@@ -116,6 +121,13 @@
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
                 <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-bom</artifactId>
+                <version>${protobuf.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
