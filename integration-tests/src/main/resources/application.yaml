@@ -7,7 +7,10 @@ spring:
         options:
           hostname: localhost
           port: ${server.grpc.port}
+    openai:
+      api-key: demo
 
 server:
   grpc:
     port: 50051
+
