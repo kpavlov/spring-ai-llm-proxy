@@ -2,13 +2,13 @@
 package me.kpavlov.spring.server.grpc
 
 import io.grpc.BindableService
-import jakarta.annotation.PreDestroy
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.EventListener
+import javax.annotation.PreDestroy
 
 @Configuration
 @ConditionalOnClass(BindableService::class)

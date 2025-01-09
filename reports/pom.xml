@@ -30,6 +30,11 @@
         </dependency>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
+            <artifactId>grpc-server-spring-boot-starter</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
             <artifactId>llm-proxy-client-spring-boot-starter</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

@@ -1,5 +1,5 @@
 // (C) Copyright 2025 Konstantin Pavlov. Licensed under BSD-3-Clause License.
-package me.kpavlov.llm.proxy.server.grpc
+package me.kpavlov.spring.server.grpc
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
@@ -14,7 +14,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  * @property port gRPC server port. Defaults to `50051`.
  */
 @ConfigurationProperties(prefix = "server.grpc")
-data class LlmGrpcServerProperties(
+data class GrpcServerProperties(
     val enabled: Boolean = true,
     val address: String = "localhost",
     val port: Int = 50051,
