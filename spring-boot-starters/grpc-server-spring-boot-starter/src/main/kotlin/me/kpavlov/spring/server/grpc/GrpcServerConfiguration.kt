@@ -2,6 +2,7 @@
 package me.kpavlov.spring.server.grpc
 
 import io.grpc.BindableService
+import io.grpc.ServerServiceDefinition
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.context.event.ApplicationStartedEvent
@@ -18,12 +19,14 @@ open class GrpcServerConfiguration {
     @Bean
     open fun grpcServer(
         @Value("\${server.grpc.port}") port: Int,
-        bindableServices: BindableService,
+        services: List<ServerServiceDefinition>,
+        bindableServices: List<BindableService>,
     ): GrpcServer {
         server =
             GrpcServer(
                 port = port,
-                bindableService = bindableServices,
+                services = services,
+                bindableServices = bindableServices,
             )
         return server
     }

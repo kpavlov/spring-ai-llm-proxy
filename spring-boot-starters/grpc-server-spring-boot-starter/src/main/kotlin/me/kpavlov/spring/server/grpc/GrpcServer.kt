@@ -4,6 +4,7 @@ package me.kpavlov.spring.server.grpc
 import io.grpc.BindableService
 import io.grpc.Server
 import io.grpc.ServerBuilder
+import io.grpc.ServerServiceDefinition
 import org.slf4j.LoggerFactory
 
 /**
@@ -19,17 +20,27 @@ import org.slf4j.LoggerFactory
  * @property port The port on which the server listens for incoming gRPC requests.
  * @constructor Creates a `GrpcServer` instance with the specified port and LLM service.
  */
-class GrpcServer(
+open class GrpcServer(
     private val port: Int,
-    bindableService: BindableService,
+    services: List<ServerServiceDefinition> = listOf(),
+    bindableServices: List<BindableService> = listOf(),
 ) {
+    private val logger = LoggerFactory.getLogger(GrpcServer::class.java)
+
     private val server: Server =
         ServerBuilder
             .forPort(port)
-            .addService(bindableService)
-            .build()
-
-    private val logger = LoggerFactory.getLogger(GrpcServer::class.java)
+            .also { builder ->
+                services.forEach {
+                    logger.info("Registering ServerServiceDefinition: {}", it)
+                    builder.addService(it)
+                }
+            }.also { builder ->
+                bindableServices.forEach {
+                    logger.info("Registering BindableService: {}", it)
+                    builder.addService(it)
+                }
+            }.build()
 
     fun start() {
         server.start()
