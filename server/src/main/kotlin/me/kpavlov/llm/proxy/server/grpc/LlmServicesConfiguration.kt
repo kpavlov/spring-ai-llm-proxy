@@ -2,6 +2,7 @@
 package me.kpavlov.llm.proxy.server.grpc
 
 import io.grpc.BindableService
+import me.kpavlov.llm.proxy.router.DispatchingLlmService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -11,5 +12,10 @@ open class LlmServicesConfiguration {
     open fun llmService(): LlmService = LlmServiceImpl
 
     @Bean
-    open fun llmGrpcService(service: LlmService): BindableService = LlmServiceGrpcImpl(service)
+    open fun llmServiceDispatcher(llmServices: Map<String, LlmService>): DispatchingLlmService =
+        DispatchingLlmService(llmServices)
+
+    @Bean
+    open fun llmGrpcService(service: DispatchingLlmService): BindableService =
+        LlmServiceGrpcImpl(service)
 }

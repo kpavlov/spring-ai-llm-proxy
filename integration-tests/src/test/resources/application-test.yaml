@@ -3,6 +3,7 @@ debug: true
 logging:
   level:
     "me.kpavlov.llm.proxy": debug
+    "me.kpavlov.spring": debug
     root: debug
 
 spring:
