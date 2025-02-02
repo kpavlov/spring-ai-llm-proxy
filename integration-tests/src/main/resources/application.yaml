@@ -8,7 +8,10 @@ spring:
           hostname: localhost
           port: ${server.grpc.port}
     openai:
-      api-key: demo
+      api-key: demo # SPRING_AI_OPENAI_API_KEY
+      chat:
+        options:
+          stream-usage: true
 
 server:
   grpc:

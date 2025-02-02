@@ -4,13 +4,18 @@ package me.kpavlov.llm.proxy.tests
 import assertk.assertThat
 import assertk.assertions.contains
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runTest
 import me.kpavlov.llm.proxy.grpc.client.LlmClient
 import me.kpavlov.llm.proxy.sample.client.SampleApplication
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaDuration
 
 @SpringBootTest(classes = [SampleApplication::class])
 class E2eTest {
@@ -25,36 +30,46 @@ class E2eTest {
     }
 
     @Test
-    fun `Send and receive messages`() =
+    fun `Send and receive messages`() {
+        val openAiResponse = "OpenAI's servers are as stable as their CEOs' employment status"
         runTest {
             openaiMock.completion {
                 requestBodyContains("Tell me a joke")
             } respondsStream {
                 responseFlow =
-                    "OpenAI's servers are as stable as their CEOs' employment status"
+                    openAiResponse
                         .split(" ")
+                        .map { "$it " }
                         .asFlow()
             }
 
             val result = StringBuffer()
-            client.use { client ->
-                client.chat("Tell me a joke").collect { response ->
-                    when {
-                        response.hasContent() -> {
-                            print(response)
-                            result.append(response.content.text)
-                            if (response.content.isFinal) {
-                                println("\nFinal response received")
+            client.use {
+                it
+                    .chat("Tell me a joke")
+                    .onEach { response ->
+                        when {
+                            response.hasContent() -> {
+                                print("❇️ Response:$response")
+                                result.append(response.content.text)
+                                if (response.content.isFinal) {
+                                    println("\nFinal response received")
+                                }
+                            }
+
+                            response.hasError() -> {
+                                System.err.println("Error: ${response.error.message}")
                             }
                         }
-
-                        response.hasError() -> {
-                            System.err.println("Error: ${response.error.message}")
-                        }
-                    }
-                }
+                    }.count()
             }
-            println("Result: $result")
-            assertThat(result).contains("Here's your response...")
+
+            await
+                .pollInterval(1.seconds.toJavaDuration())
+                .untilAsserted {
+                    println("Result: $result")
+                    assertThat(result).contains(openAiResponse)
+                }
         }
+    }
 }
