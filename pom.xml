@@ -70,6 +70,7 @@
         <spring-ai.version>1.0.0-M5</spring-ai.version>
         <spring-boot.version>3.4.1</spring-boot.version>
         <wiremock.version>3.9.2</wiremock.version>
+        <ai-mocks.version>0.1.1</ai-mocks.version>
     </properties>
 
     <dependencyManagement>
@@ -117,6 +118,13 @@
                 <artifactId>kotlinx-coroutines-test-jvm</artifactId>
                 <version>${kotlinx.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>me.kpavlov.aimocks</groupId>
+                <artifactId>bom</artifactId>
+                <version>${ai-mocks.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.junit</groupId>

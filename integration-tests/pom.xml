@@ -41,6 +41,11 @@
             <artifactId>kotlinx-coroutines-test-jvm</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>me.kpavlov.aimocks</groupId>
+            <artifactId>ai-mocks-openai</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

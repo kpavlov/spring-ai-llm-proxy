@@ -9,9 +9,9 @@ import me.kpavlov.llm.proxy.grpc.v1.ChatCompletionRequest
 object LlmServiceImpl : LlmService {
     override suspend fun process(request: ChatCompletionRequest): Flow<LlmResult> =
         flow {
-            emit(LlmResult.Content("Processing request: ${request.prompt.content}"))
+            emit(LlmResult.Content("> ${request.prompt.content}\n"))
             @Suppress("MagicNumber")
-            delay(1000) // Simulate processing
+            delay(500) // Simulate processing
             emit(LlmResult.Content("Here's your response..."))
             emit(LlmResult.Completed())
         }

@@ -1,8 +1,10 @@
 // (C) Copyright 2025 Konstantin Pavlov. Licensed under BSD-3-Clause License.
 package me.kpavlov.spring.server.grpc
 
+import io.grpc.Attributes
 import io.grpc.BindableService
 import io.grpc.ServerServiceDefinition
+import io.grpc.ServerTransportFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.context.event.ApplicationStartedEvent
@@ -27,7 +29,21 @@ open class GrpcServerConfiguration {
                 port = port,
                 services = services,
                 bindableServices = bindableServices,
-            )
+            ) {
+                addTransportFilter(
+                    object : ServerTransportFilter() {
+                        override fun transportReady(transportAttrs: Attributes): Attributes {
+                            println("Transport Ready. transportAttrs = $transportAttrs")
+                            return super.transportReady(transportAttrs)
+                        }
+
+                        override fun transportTerminated(transportAttrs: Attributes) {
+                            println("Transport Terminated. transportAttrs = $transportAttrs")
+                            super.transportTerminated(transportAttrs)
+                        }
+                    },
+                )
+            }
         return server
     }
 

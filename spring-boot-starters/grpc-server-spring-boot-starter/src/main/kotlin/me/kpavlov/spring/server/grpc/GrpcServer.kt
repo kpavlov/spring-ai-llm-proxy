@@ -24,6 +24,7 @@ open class GrpcServer(
     private val port: Int,
     services: List<ServerServiceDefinition> = listOf(),
     bindableServices: List<BindableService> = listOf(),
+    configurer: ServerBuilder<*>.() -> Unit = {},
 ) {
     private val logger = LoggerFactory.getLogger(GrpcServer::class.java)
 
@@ -40,7 +41,8 @@ open class GrpcServer(
                     logger.info("Registering BindableService: {}", it)
                     builder.addService(it)
                 }
-            }.build()
+            }.also(configurer)
+            .build()
 
     fun start() {
         server.start()
