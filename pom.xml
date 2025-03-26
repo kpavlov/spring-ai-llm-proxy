@@ -65,7 +65,7 @@
         <kotlinx.version>1.10.1</kotlinx.version>
         <mockito-kotlin.version>5.4.0</mockito-kotlin.version>
         <mockito.version>5.16.1</mockito.version>
-        <protobuf.version>4.30.1</protobuf.version>
+        <protobuf.version>4.30.2</protobuf.version>
         <slf4j.version>2.0.17</slf4j.version>
         <spring-ai.version>1.0.0-M6</spring-ai.version>
         <spring-boot.version>3.4.4</spring-boot.version>
