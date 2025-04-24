@@ -59,7 +59,7 @@
         <!-- Dependencies -->
         <assertk.version>0.28.1</assertk.version>
         <awaitility.version>4.2.2</awaitility.version>
-        <grpc-kotlin.version>1.4.1</grpc-kotlin.version>
+        <grpc-kotlin.version>1.4.3</grpc-kotlin.version>
         <grpc.version>1.72.0</grpc.version>
         <junit.version>5.12.2</junit.version>
         <kotlinx.version>1.10.2</kotlinx.version>
