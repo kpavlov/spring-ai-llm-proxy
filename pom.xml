@@ -68,7 +68,7 @@
         <protobuf.version>4.31.0</protobuf.version>
         <slf4j.version>2.0.17</slf4j.version>
         <spring-ai.version>1.0.0-M6</spring-ai.version>
-        <spring-boot.version>3.4.6</spring-boot.version>
+        <spring-boot.version>3.5.0</spring-boot.version>
         <wiremock.version>3.9.2</wiremock.version>
         <ai-mocks.version>0.1.1</ai-mocks.version>
     </properties>
